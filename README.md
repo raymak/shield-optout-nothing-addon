@@ -13,6 +13,7 @@ at second shell/prompt, watch files for changes to rebuild:
 
 ## in Firefox:
 
-1. `about:debugging > [load temporary addon] > choose `dist/addon.xpi`
-2. `tools > Web Developer > Browser Toolbox`
+1. `about:config`, set `extensions.legacy.enabled` to `true`
+2. `about:debugging > [load temporary addon] > choose `dist/addon.xpi`
+3. `tools > Web Developer > Browser Toolbox`
 
