@@ -14,17 +14,14 @@ var EXPORTED_SYMBOLS = ["config"];
 
 var config = {
   "study": {
-    "studyName": "mostImportantExperiment", // no spaces, for all the reasons
-    "variation": {
-      "name": "kittens",
-    }, // optional, use to override/decide
+    "studyName": "optoutNothingStudy1", // no spaces, for all the reasons
     "weightedVariations": [
       {"name": "control",
         "weight": 1},
-      {"name": "kittens",
-        "weight": 1.5},
-      {"name": "puppers",
-        "weight": 2},  // we want more puppers in our sample
+      {"name": "treatment1",
+        "weight": 1},
+      {"name": "treatment2",
+        "weight": 1},  // we want more puppers in our sample
     ],
     /** **endings**
       * - keys indicate the 'endStudy' even that opens these.
@@ -36,18 +33,18 @@ var config = {
     "endings": {
       /** standard endings */
       "user-disable": {
-        "baseUrl": "data:,You uninstalled",
+        "baseUrl": null,
       },
       "ineligible": {
-        "baseUrl": "http://www.example.com/?reason=ineligible",
+        "baseUrl": null,
       },
       "expired": {
-        "baseUrl": "http://www.example.com/?reason=expired",
+        "baseUrl": null,
       },
       /** User defined endings */
       "too-popular": {
         // data uri made using `datauri-cli`
-        "baseUrl": "data:text/html;base64,PGh0bWw+CiAgPGJvZHk+CiAgICA8cD5Zb3UgYXJlIHVzaW5nIHRoaXMgZmVhdHVyZSA8c3Ryb25nPlNPIE1VQ0g8L3N0cm9uZz4gdGhhdCB3ZSBrbm93IHlvdSBsb3ZlIGl0IQogICAgPC9wPgogICAgPHA+VGhlIEV4cGVyaW1lbnQgaXMgb3ZlciBhbmQgd2UgYXJlIFVOSU5TVEFMTElORwogICAgPC9wPgogIDwvYm9keT4KPC9odG1sPgo=",
+        "baseUrl": null,
         "study_state": "ended-positive",  // neutral is default
       },
       "a-non-url-opening-ending": {

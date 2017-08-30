@@ -8,13 +8,21 @@ const {utils: Cu} = Components;
 const CONFIGPATH = `${__SCRIPT_URI_SPEC__}/../Config.jsm`;
 const { config } = Cu.import(CONFIGPATH, {});
 const studyConfig = config.study;
-Cu.import("resource://gre/modules/Console.jsm");
+Cu.import('resource://gre/modules/Console.jsm');
+Cu.import('resource://gre/modules/AddonManager.jsm');
+const { TelemetryEnvironment } = Cu.import('resource://gre/modules/TelemetryEnvironment.jsm', null);
 const log = createLog(studyConfig.studyName, config.log.bootstrap.level);  // defined below.
 
 const STUDYUTILSPATH = `${__SCRIPT_URI_SPEC__}/../${studyConfig.studyUtilsPath}`;
 const { studyUtils } = Cu.import(STUDYUTILSPATH, {});
 
 async function startup(addonData, reason) {
+
+  console.log(`current time: ${Date.now()}`);
+
+  if (Date.now() > 1505174400000) // Tuesday, September 12, 2017 12:00:00 AM
+    await removeAddon(addonData);
+
   // addonData: Array [ "id", "version", "installPath", "resourceURI", "instanceID", "webExtension" ]  bootstrap.js:48
   log.debug("startup", REASONS[reason] || reason);
   studyUtils.setup({
@@ -42,15 +50,10 @@ async function startup(addonData, reason) {
   }
   await studyUtils.startup({reason});
 
+  if (Date.now() > 1504742400000) // Thursday, September 7, 2017 12:00:00 AM)
+    studyUtils.endStudy({reason: "expired"});
+
   console.log(`info ${JSON.stringify(studyUtils.info())}`);
-  // if you have code to handle expiration / long-timers, it could go here.
-  const webExtension = addonData.webExtension;
-  webExtension.startup().then(api => {
-    const {browser} = api;
-    // messages intended for shieldn:  {shield:true,msg=[info|endStudy|telemetry],data=data}
-    browser.runtime.onMessage.addListener(studyUtils.respondToWebExtensionMessage);
-    //  other message handlers from your addon, if any
-  });
   // studyUtils.endStudy("user-disable");
 }
 
@@ -70,6 +73,9 @@ function shutdown(addonData, reason) {
 
   // normal shutdown, or 2nd attempts
     console.log("Jsms unloading");
+    Cu.unload('resource://gre/modules/Console.jsm');
+    Cu.unload('resource://gre/modules/AddonManager.jsm');
+    Cu.unload('resource://gre/modules/TelemetryEnvironment.jsm');
     Jsm.unload(config.modules);
     Jsm.unload([CONFIGPATH, STUDYUTILSPATH]);
   }
@@ -106,6 +112,16 @@ function createLog(name, levelWord) {
   L.addAppender(new Log.ConsoleAppender(new Log.BasicFormatter()));
   L.level = Log.Level[levelWord] || Log.Level.Debug; // should be a config / pref
   return L;
+}
+
+async function removeAddon(addonData){
+  console.log("removing addon");
+  console.log(`about to uninstall ${addonData.id}`);
+  await TelemetryEnvironment.setExperimentInactive(studyConfig.studyName);
+  studyUtils._isEnding = true;
+  await new Promise(function(resolve, reject){
+    AddonManager.getAddonByID(addonData.id, addon => resolve(addon.uninstall()));
+  });
 }
 
 async function chooseVariation() {
